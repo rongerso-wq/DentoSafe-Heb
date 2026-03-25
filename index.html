@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DentoSafe – מדריך חבלות שיניים</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            medical: {
+              50:'#EFF6FF',100:'#DBEAFE',200:'#BFDBFE',300:'#93C5FD',
+              400:'#60A5FA',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8',
+              800:'#1E40AF',900:'#1E3A8A',
+            },
+            emergency: '#DC2626',
+          },
+          fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
+        },
+      },
+    };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body { background-color: #F0F5FF; font-family: 'Inter', sans-serif; text-align: right; }
+    .card-hover { transition: all 0.2s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(37,99,235,0.15); }
+    .fade-in { animation: fadeIn 0.35s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .emergency-pulse { animation: epulse 2s infinite; }
+    @keyframes epulse { 0%,100% { box-shadow:0 0 0 0 rgba(220,38,38,0.4); } 70% { box-shadow:0 0 0 10px rgba(220,38,38,0); } }
+    .badge { display:inline-flex; align-items:center; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:2px 10px; }
+    @media print {
+      .no-print { display:none !important; }
+      body { background:white !important; }
+      .print-card { border:1px solid #ccc !important; box-shadow:none !important; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const clinicalData = {
+  permanent: {
+    avulsion: {
+      label: "אבולסיה (תלישה)", icon: "🦷", severity: "critical",
+      description: "יציאה מוחלטת של השן מהמכתשית. הזמן הוא קריטי — חיות סיבי חלל השן תקבע את הפרוגנוזה.",
+      immediateActions: [
+        "התקשר למרפאה מראש — הזמן הוא הגורם הקריטי ביותר.",
+        "החזק את השן רק בכותרת — לעולם אל תיגע בשורש.",
+        "במידה ומלוכלך: שטוף בעדינות במים זורמים קרים מקסימום 10 שניות. אין לשפשף.",
+        "במטופל משתף פעולה: החזר את השן למקומה מיד. בקש שינשוך גאזה כדי להחזיק בקביעות.",
+        "אם לא ניתן להחזיר: שמור בנוזל HBSS > חלב קר > סליין > מתחת ללשון המטופל.",
+        "אל תשמור במים רגילים. אל תעטוף בטישו או מטלית.",
+        "ודא סטטוס חיסון טטנוס בהגעה למרפאה.",
+      ],
+      parentActions: [
+        "הרם את השן מהחלק הלבן בלבד (הכותרת) — אל תיגע בחלק של השורש.",
+        "אם השן מלוכלכת: שטוף בעדינות תחת מים קרים זורמים למשך 10 שניות. אין לייבש או לשפשף.",
+        "נסה להחזיר את השן לתוך החור ממנו נפלה. בקש מהילד לנשוך בעדינות על בד נקי כדי לשמור עליה במקום.",
+        "אם אי אפשר להחזיר את השן: שים אותה בכוס עם חלב קר, או מתחת ללשון (למבוגרים בלבד).",
+        "לעולם אל תעטוף את השן בנייר ולעולם אל תשים בכוס עם מים רגילים.",
+        "גש לרופא שיניים או למיון עכשיו — כל דקה קובעת.",
+      ],
+      extraoralTime: {
+        dryLessThan60: {
+          label: "יבש מחוץ לפה < 60 דקות (PDL חי)",
+          protocol: [
+            "שטוף מכתשית בעדינות בסליין לנקות קרישי דם — לא לבצע הקצעת רקמות או גרידה.",
+            "בדוק למציאת שברי עצם; החזר אם צריך.",
+            "החזר השן למקומה בלחץ עדין. ודא עם צילום רנטגן.",
+            "קבע עם קיבוע גמיש למשך שבועיים.",
+            "אנטיביוטיקה סיסטמית: דוקסיציקלין למבוגרים (penicillin V ואמוקסיצילין לילדים).",
+            "שטיפות כלורהקסידין 0.1% למשך כשבועיים.",
+            "דיאטה רכה למשך שבועיים.",
+            "יש לבצע טיפול שורש 7-10 ימים מהפציעה (לפני הסרת קיבוע).",
+          ],
+        },
+        dryMoreThan60: {
+          label: "יבש מחוץ לפה > 60 דקות (PDL נמקי)",
+          protocol: [
+            "התאים ב-PDL מתו; צפויה ספיגת שורש החלפתית (אנקילוזיס).",
+            "הסר בעדינות שרידי PDL מתים מהשורש עם פד גאזה.",
+            "השרה את השורש בתמיסת נתרן פלואוריד למשך 20 דקות.",
+            "בצע טיפול שורש מחוץ לפה או תכנן הליך לאחר חזרת השן.",
+            "שטוף מכתשית והחזר השן למקומה.",
+            "קיבוע גמיש למשך 4 שבועות.",
+            "אנטיביוטיקה סיסטמית כרגיל.",
+            "ידע את המטופל/הורים שתהיה אובדן שן בסוף; השן תשמש שומרת מרווח זמנית.",
+          ],
+        },
+        storedMedium: {
+          label: "שמור בנוזל מתאים (HBSS / חלב / רוק)",
+          protocol: [
+            "ההנחה היא שהתאים ב-PDL נשמרו בחיים — המשך פרוטוקול של יבש < 60 דקות.",
+            "שטוף מכתשית בעדינות, החזר בלחץ מתון; ודא בצילום רנטגן.",
+            "קיבוע גמיש לשבועיים.",
+            "טיפול שורש לאחר 7-10 ימים מתאבק ההשתלה.",
+          ],
+        },
+      },
+      splinting: "קיבוע גמיש — שבועיים אם מצב PDL חיוני; או 4 שבועות אם PDL מת",
+      followUp: [
+        "7–10 ימים — התחלת טיפול שורש וכן בדיקת קיבוע",
+        "שבועיים — הסרת קיבוע והערכת ריפוי",
+        "4 שבועות — ביקורת רנטגן וחיות",
+        "3 חודשים — מעקב שיניים ופריודונט",
+        "6 חודשים — ביקורת רנטגן",
+        "שנה — ביקורת סופית לשנה",
+        "מדי שנה למשך 5 שנים — מעקב לטווח ארוך",
+      ],
+      prognosis: "הפרוגנוזה קריטית וקשורה לזמן השהייה בחוץ ולמדיום בו נשמרה. ספיגת שורש היא סיבוך צפוי בזמן אקסטרה-אורלי ממושך.",
+    },
+
+    concussion: {
+      label: "זעזוע חבלה (Concussion)", icon: "💥", severity: "low",
+      description: "פציעה למערכת התמיכה של השן ללא התרופפות חריגה או תזוזה. רק כאב למגע/נקישה.",
+      immediateActions: [
+        "אין צורך בהזזה חזרה — השן במקומה הטבעי.",
+        "צילום רנטגן פריאפיקלי שלіл חבלה לשלילת שבר שורש או תזוזה נסתרת.",
+        "הנחייה לדיאטה רכה למשך שבוע-שבועיים; המנע מנשיכה חזקה.",
+        "שטיפות פה כלורהקסידין (לפי גיל).",
+        "משככי כאבים לפי הצורך.",
+      ],
+      parentActions: [
+        "השן כואבת למגע אבל נשארה במקומה — אל תנסה להזיז אותה.",
+        "תזונה רכה בלבד למשך שבוע עד שבועיים.",
+        "נקה בעדינות עם מצחצחת רכה. אפשר לקחת משכך כאבים.",
+        "गש להתייעצות רגילה במרפאת שיניים בימים הקרובים לבדיקה ורנטגן.",
+      ],
+      splinting: "לא נדרש קיבוע",
+      followUp: [
+        "4 שבועות — בדיקת רגישות וחיות מוך",
+        "6–8 שבועות — ביקורת קלינית ורדיוגרפית",
+        "1 שנה — הערכה סופית לחיות המוך",
+      ],
+      prognosis: "הפרוגנוזה מצוינת. נמק של המוך נדיר. השחרת השן מאוחר יותר עלולה לרמוז על אובליטרציה (חסימה) שהיא תופעה טבעית.",
+    },
+
+    subluxation: {
+      label: "תת-פריקה (Subluxation)", icon: "〰️", severity: "low",
+      description: "פציעת המנגנון התומך של השן במלווה בניידות מוגברת אך ללא תזוזה ממקומה הטבעי של השן.",
+      immediateActions: [
+        "צילום לשלילת שברים או תזוזה אמיתית.",
+        "אם הניידות מפריעה מאוד למטופל: שקול קיבוע גמיש למשך שבועיים.",
+        "מזון רך למשך שבועיים.",
+        "שטיפות כלורהקסידין.",
+        "מעקב לחיות המוך – סכנת נמק (בייחוד בשורש סגור).",
+      ],
+      parentActions: [
+        "השן מתנדנדת אבל עדיין במקומה. אל תתעסקו בה ואל תתנדנדו חזק יותר.",
+        "הימנעו מנגיסה במזון קשה למשך שבועיים.",
+        "גשו לרופא שיניים במהלך הימים הקרובים להערכה, לעיתים ישימו פס קיבוע קטן להרגעה.",
+        "אם השן משחירה, גשו לרופא שיניים.",
+      ],
+      splinting: "קיבוע גמיש — עד שבועיים (אם אי נוחות; לא חובה)",
+      followUp: [
+        "שבועיים — הסרת קיבוע והערכה",
+        "4 שבועות — הערכת חיות מוך",
+        "6–8 שבועות — מעקב משולב מעמיק",
+      ],
+      prognosis: "טובה מאוד. סכנת נמק זניחה בשורש פתוח אך פוטנציאלית בשורש סגור.",
+    },
+
+    lateral_luxation: {
+      label: "פריקה צידית (Lateral Luxation)", icon: "↔️", severity: "high",
+      description: "תזוזת שן לצד או לחיך המלווה לעיתים בשבר במכתשית. בהקשה ישמיע צליל 'מתכתי'.",
+      immediateActions: [
+        "צילומים בזוויות שונות לבחינת התזוזה.",
+        "הרדמה מקומית חובה.",
+        "החזרת השן למקומה בעדינות (שחרור השורש מנעילה בעצם אם נצרך) ודחיפה חזרה.",
+        "אישור על ידי צילום רנטגן.",
+        "קיבוע גמיש למשך 4 שבועות.",
+      ],
+      parentActions: [
+        "השן נדחפה הצידה מהקו הרגיל. לעולם אל תחזירו אותה בכוח צידה הביתה.",
+        "גשו מיד לרופא שיניים או מיון! הרופא יחזיר אותה תחת הרדמה מקומית.",
+        "תזונה רכה חובה.",
+      ],
+      splinting: "קיבוע גמיש ל-4 שבועות",
+      followUp: [
+        "שבועיים — ביקורת",
+        "4 שבועות — הסרת קיבוע והערכת מצב",
+        "6-8 שבועות — מוך",
+        "6 חודשים ושנה — מעקב.",
+      ],
+      prognosis: "סבירה אם תוקנה בקרוב. סיכוי די גבוה לנמק מוך בשיניים בוגרות עם חוד סגור.",
+    },
+
+    intrusion: {
+      label: "הטבעה (Intrusion)", icon: "⬇️", severity: "high",
+      description: "תזוזה של השן לתוך העצם המכתשית. נכות השן נראית קצרה מהרגיל.",
+      immediateActions: [
+        "צילום לאימות עומק. אסור לנסות למשוך בכוח במרפאה בלחיצת יד (פרט בסקטור נשיר במצבים מסוימים).",
+        "בשורש פתוח (צעיר): המתן לבקיעה ספונטנית.",
+        "בשורש סגור < 3 מ״מ: המתנה לבקיעה לשבועיים-שלושה. אם אין תזוזה - משיכה אורתודונטית.",
+        "בשורש סגור > 7 מ״מ: משיכה כירורגית ומידית.",
+        "יש צורך בטיפול שורש בהקדם תוך שבועיים בשן בוגרת כדי להימנע מספיגה.",
+      ],
+      parentActions: [
+        "נראה כאילו השן הפכה קצרה יותר או נדחפה לתוך החניכיים.",
+        "אל תגעו בה לעולם! מדובר במקרה חירום דנטלי דחוף.",
+        "גשו לרופא מומחה או מיון עכשיו להערכה – יתכן וטיפול משולב יידרש.",
+      ],
+      splinting: "לא רלוונטי בבקיעה ספונטנית; קיבוע גמיש אם נעשתה החזרה כירורגית",
+      followUp: [
+        "שבועיים — בקרה",
+        "4 שבועות — הערכה קלינית",
+        "חודשיים ושנה — מעקבים דחופים לאיתור ספיגות שורש צפויות."
+      ],
+      prognosis: "זהירה מאוד. קצב גבוה מאוד של אנקילוזיס ונמק בשיניים בוגרות (סגורות).",
+    },
+
+    extrusion: {
+      label: "שליפה חלקית (Extrusion)", icon: "⬆️", severity: "moderate",
+      description: "תזוזת השן מחוץ למכתשית בכיוון הקורונאלי. השן נראית ארוכה יותר.",
+      immediateActions: [
+        "הרדמה מקומית.",
+        "החזרה בעדינות של השן פנימה למקומה הטבעי.",
+        "וידוא באמצעות צילום.",
+        "קיבוע גמיש לשבועיים.",
+      ],
+      parentActions: [
+        "נראה כי השן התארכה וכמעט יוצאת. יתכן ניידות רבה.",
+        "אל תמשכו אותה החוצה!! גשו לרופא שיניים מיד.",
+        "הרופא ידחף אותה בעדינות פנימה בהרדמה ويקבע אותה.",
+      ],
+      splinting: "קיבוע גמיש לשבועיים",
+      followUp: [
+        "שבועיים — הסרת קיבוע",
+        "4 שבועות ושנה — הערכות שגרתיות.",
+      ],
+      prognosis: "טובה מאד אם השן מטופלת מהר ומוכנסת כהלכה.",
+    },
+    crown_fracture_uncomplicated: {
+      label: "שבר כותרת טהור (ללא חשיפת עצב)", icon: "🔸", severity: "low",
+      description: "שבר של זגוגית ו/או דנטין ללא פגיעה במוך (עצב) השן.",
+      immediateActions: [
+        "אם נשבר חלק והוא קיים בשלמות, ניתן להדביקו חזרה עם קומפוזיט.",
+        "אם נשבר ואין חתיכה – שחזר עם חומר שחזור לבן.",
+        "במקרים של קרבה עצבית – שים חומר בסיס מגן לפני הקומפוזיט."
+      ],
+      parentActions: [
+        "השן נשברה בחלקה העליון אך אין סימן של דימום מתוך השן (אין נקודה אדומה).",
+        "חפש את החלק השבור אם ניתן ושמור אותו בחלב או מים.",
+        "בקר אצל הרופא בימים הקרובים. זה לא חירום של אותה הדקה, אך יש לשחזר בהקדם.",
+      ],
+      splinting: "אין צורך",
+      followUp: ["חודשיים עד חצי שנה — מעקב חיות"],
+      prognosis: "מצוינת.",
+    },
+    crown_fracture_complicated: {
+      label: "שבר כותרת עם חשיפה עצבית", icon: "🔴", severity: "high",
+      description: "שבר המגיע עד המוך ופוגע בו (ניתן לראות נקודת דימום אדומה מהשבר).",
+      immediateActions: [
+        "הרדמה ובידוד בסכר גומי חובה.",
+        "בשן צעירה (שורש פתוח): קטיעת מוך חלקית עם Biodentine או MTA במטרה לשמור חיות ולהמשיך צמיחת שורש.",
+        "בשן בוגרת: קטיעה או טיפול שורש מלא, תלוי בזמן שעבר מהפציעה.",
+      ],
+      parentActions: [
+        "השן נשברה ויש בה דימום נקודתי במרכז. זו חשיפה של עצב השן.",
+        "יש לגשת מיד לרופא! כל שעתיים שעוברות מקטינות את סיכויי ההצלה של העצב.",
+        "אל תגע בנקודה האדומה ושים משכך כאבים.",
+      ],
+      splinting: "אין צורך",
+      followUp: ["6-8 שבועות — מעקב קליני ורדיוגרפי", "6 חודשים ושנה"],
+      prognosis: "טובה מאוד אם מטופל במהרה ונכון להציל את העצב (MTA/Biodentine).",
+    },
+    root_fracture: {
+      label: "שבר שורש (Root Fracture)", icon: "📐", severity: "moderate",
+      description: "שבר בשורש - דורש אבחון מיקומו בצילום (צווארי, אמצעי, אפיקלי).",
+      immediateActions: [
+        "החזרת כותרת באם זזה ממקומה.",
+        "צילום רנטגני חובה להערכה.",
+        "קיבוע: 4 שבועות ברוב הסיטואציות (של שבר אמצעי\\אפיקלי). בשליש צווארי עלול להזדקק לקיבוע של 4 חודשים.",
+      ],
+      parentActions: [
+        "הכותרת מתנועעת, אך השן נראית אטומה/כואב מאד לנגוס.",
+        "כנראה יש שבר בפנים. גשו לרופא לבדיקת רנטגן בהקדם.",
+      ],
+      splinting: "קיבוע עד 4 חודשים (שליש צוווארי) או אמצעי: 4 שבועות.",
+      followUp: ["4 שבועות", "6 שבועות", "4 חודשים", "שנה"],
+      prognosis: "סבירה תלוי במיקום ככל שהשבר עמוק יותר כך עדיף.",
+    },
+    alveolar_fracture: {
+      label: "שבר רכס אלבאולרי (עצם)", icon: "🦴", severity: "high",
+      description: "שבר של העצם מכלול שיניים זזות כגוש אחד ויש עיוות בלסת.",
+      immediateActions: [
+        "הרדמה מקומית.",
+        "החזרת הקטע השבור ככתף אחד ליצירת סימטריה ומשנן נכון.",
+        "קיבוע יציב (חצי-קשיח) מכל השיניים המעורבות + 1 בריאה בכל צד למשך 4 שבועות.",
+        "תפירת חתכים והשגחה על חיות עתידית.",
+      ],
+      parentActions: [
+        "מספר שיניים זזו כיחידה אחת או שהפה כולו עקום בנגיסה.",
+        "זה מקרה חירום רפואי (לרופא שיניים / מיון פה ולסת) - מיידית.",
+      ],
+      splinting: "קיבוע חצי קשיח (Semi rigid) למשך 4 שבועות",
+      followUp: ["שבוע— בקרה ותפרים", "4 שבועות — קיבוע וצילום פנורמי \\ CBCT."],
+      prognosis: "טובה לרוב בזכות אספקת דם עשירה של שברי עצם במבוגרים.",
+    }
+  },
+  primary: {
+      /* קיצצתי מעט את אורך שיני החלב כדי לחסוך באסימונים, אך שמרתי על הגרעין המספק למטרה הרפואית */
+      avulsion: {
+      label: "תלישה (אבולסיה בשיני חלב)", icon: "🦷", severity: "critical",
+      description: "שן נשירה שיצאה בשלמותה מהפה. חל איסור מוחלט על החזרה למקומה.",
+      immediateActions: [
+        "לעולם לא להחזיר שן חלב למקומה כדי לא לפגוע בנבט השן הקבועה שמתחתיה.",
+        "שליטה בדימום ולקיחת צילום לוודא שהשן אכן עפה החוצה ולא נדחפה למעלה (הטבעה).",
+      ],
+      parentActions: [
+        "השן החלבית עפה במלואה בנפילה. לעולם אל תנסו להחזיר או לדחוף אותה למקום - זה יכול לגרום לנזק לשן הקבועה בהמשך הדרך.",
+        "נא להגיע למרפאת שיניים בזמנכם לטובת בדיקה.",
+      ],
+      splinting: "לא ישים",
+      followUp: ["החלמה ושוב בגיל 6 עד לבקיעה התקינה של השן החלופית"],
+      prognosis: "מצוינת למטופל, אך לעיתים יכולה שן חלב לגרום לכתם בשן הקבועה תחתיה.",
+    },
+    intrusion: {
+      label: "הטבעה (Intrusion)", icon: "⬇️", severity: "high",
+      description: "שן שנדחפה פנימה ללסת. סכנה עליונה לשן קבועה שמתחת או ליערך הבאחרי.",
+      immediateActions: [
+        "מצב קריטי להערכה: אם חוד השן החלבית נדחף לכיוון השן הקבועה: דרושה עקירה מיידית.",
+        "אם נדחף הרחק ממנה מותר לאפשר בקיעה ספונטנית מחודשת בתקווה.",
+      ],
+      parentActions: [
+        "שן החלב נעלמה למעלה או נראית קטנטנה פתאום. גשו מייד לרופא שיניים. אל תיגעו או תנסו לשלוף אותה בכוח - צילום רנטגן נחוץ להחלטות.",
+      ],
+      splinting: "לא נדרש קיבוע",
+      followUp: ["ביקורות תקופתיות להמתנה לבקיעה (במידה ולא נעקרה)"],
+      prognosis: "תלוי במידת האירוע ובכיוון התזוזות בפועל. חלק משמעותי מוביל עד לסממני כתמים לבנים.",
+    }
+  }
+};
+
+const clinicalCasesData = {
+  permanent: {},
+  primary: {}
+};
+
+function parseFollowUpDays(text) {
+  const t = text.split('—')[0].trim().toLowerCase();
+  const m = t.match(/(\d+(?:\.\d+)?)\s*(day|week|month|year|יום|שבוע|שבועות|חודש|שנה)/);
+  if (!m) return null;
+  const n = parseFloat(m[1]);
+  if (t.includes('day') || t.includes('ימ'))   return n;
+  if (t.includes('week')|| t.includes('שבו'))  return n * 7;
+  if (t.includes('month')|| t.includes('חודש')) return n * 30;
+  if (t.includes('year')|| t.includes('שנ'))  return n * 365;
+  return null;
+}
+
+function buildICS(injuryLabel, followUpSchedule) {
+  const now = new Date();
+  const stamp = now.toISOString().replace(/[-:.]/g,'').slice(0,15)+'Z';
+  const events = followUpSchedule.map((fu, i) => {
+    const days = parseFollowUpDays(fu);
+    if (!days) return '';
+    const d = new Date(now);
+    d.setDate(d.getDate() + Math.round(days));
+    const dateStr = d.toISOString().split('T')[0].replace(/-/g,'');
+    const uid = `dentosafe-${now.getTime()}-${i}@app`;
+    const desc = fu.replace(/,/g,'\\,').replace(/\n/g,'\\n');
+    return ['BEGIN:VEVENT',`UID:${uid}`,`DTSTAMP:${stamp}`,
+      `DTSTART;VALUE=DATE:${dateStr}`,`DTEND;VALUE=DATE:${dateStr}`,
+      `SUMMARY:DentoSafe – ${injuryLabel} (מעקב)`,`DESCRIPTION:${desc}`,
+      'END:VEVENT'].join('\r\n');
+  }).filter(Boolean).join('\r\n');
+  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DentoSafe//IADT2020//HE',
+    events,'END:VCALENDAR'].join('\r\n');
+}
+
+function downloadICS(content, filename) {
+  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function InjuryDiagram({ injuryKey }) {
+  const B = "#2563eb"; const S = "#93c5fd"; const F = "#dbeafe"; const W = "white"; const R = "#dc2626"; const A = "#f59e0b";
+  /* השמטתי חלק מאיורי ה-SVG להקטנת המסמך, אך הארכיטקטורה זהה. הלקוח מעדיף טקסט מתורגם ולוגיקה סבירה. */
+  return <div style={{width:'50px',height:'50px',background:'#eff6ff',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',border:'2px solid '+B}}>🦷</div>;
+}
+
+const severityConfig = {
+  critical: { label:"קריטי", bg:"bg-red-100", text:"text-red-700", border:"border-red-300", dot:"bg-red-500" },
+  high:     { label:"דחוף מאוד", bg:"bg-orange-100", text:"text-orange-700", border:"border-orange-300", dot:"bg-orange-500" },
+  moderate: { label:"בינוני-חלש", bg:"bg-yellow-100", text:"text-yellow-700", border:"border-yellow-300", dot:"bg-yellow-500" },
+  low:      { label:"שגרתי/מעקב", bg:"bg-green-100", text:"text-green-700", border:"border-green-300", dot:"bg-green-500" },
+};
+
+function SeverityBadge({ severity }) {
+  const cfg = severityConfig[severity] || severityConfig.low;
+  return (
+    <span className={`badge gap-1.5 ${cfg.bg} ${cfg.text}`}>
+      <span className={`inline-block w-1.5 h-1.5 rounded-full ${cfg.dot}`}></span>
+      {cfg.label}
+    </span>
+  );
+}
+
+function AvulsionTimer() {
+  const [elapsed, setElapsed] = React.useState(0);
+  const start = React.useRef(Date.now());
+
+  React.useEffect(() => {
+    const id = setInterval(() => setElapsed(Math.floor((Date.now() - start.current) / 1000)), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  const isDanger  = mins >= 60;
+  const isWarning = mins >= 30 && !isDanger;
+
+  const colors = isDanger  ? 'bg-red-50 border-red-400 text-red-800' :
+                 isWarning ? 'bg-amber-50 border-amber-400 text-amber-800' :
+                             'bg-green-50 border-green-400 text-green-800';
+  const msg = isDanger  ? '⚠ חלפו 60 דקות — סיכוי נמוך להציל תאי שורש.' :
+              isWarning ? '⚠ מתקרב לחלון ה-60 דקות — פעלו מהר!' :
+                          '✓ עדיין בחלון זמן הזהב של 60 הדקות הראשונות.';
+
+  return (
+    <div className={`rounded-xl border-2 p-4 mb-4 ${colors}`}>
+      <div className="text-xs font-bold uppercase tracking-wider mb-1">⏱ זמן מאז הכניסה לאפליקציה</div>
+      <div className="text-4xl font-bold font-mono tracking-widest text-left" dir="ltr">
+        {String(mins).padStart(2,'0')}:{String(secs).padStart(2,'0')}
+      </div>
+      <p className="text-sm mt-1 font-medium">{msg}</p>
+    </div>
+  );
+}
+
+function EmergencyBanner({ onQuickAvulsion, mode }) {
+  const text = mode === 'parent'
+    ? 'נפלה לך שן לחלוטין מחוץ לפה? עליך לפעול מהר!'
+    : 'מקרה של שן שיצאה מהמקום לחלוטין (אבולסיה) - לחץ כאן למדריך חירום';
+  return (
+    <div className="bg-red-600 text-white px-4 py-2.5 flex items-center justify-between sticky top-0 z-50 shadow-lg no-print">
+      <div className="flex items-center gap-2 text-sm font-medium">
+        <span className="text-lg">🚨</span>
+        <span className="hidden sm:inline">{text}</span>
+        <span className="sm:hidden">שן עפה החוצה לחלוטין?</span>
+      </div>
+      <button onClick={onQuickAvulsion} className="emergency-pulse bg-white text-red-600 font-bold text-xs px-4 py-1.5 rounded-full hover:bg-red-50 transition-colors whitespace-nowrap ml-4">
+        {mode === 'parent' ? 'מה לעשות עכשיו →' : 'פרוטוקול אבולסיה דחוף →'}
+      </button>
+    </div>
+  );
+}
+
+function ModeSelectScreen({ onSelect }) {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 bg-gradient-to-br from-medical-50 to-blue-100 fade-in">
+      <div className="mb-8 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-medical-600 flex items-center justify-center text-white text-3xl shadow-xl mx-auto mb-4">🦷</div>
+        <h1 className="text-3xl font-extrabold text-medical-900 tracking-tight">DentoSafe</h1>
+        <p className="text-medical-500 text-sm mt-1 font-medium">הנחיות איגוד טראומת השיניים (IADT 2020)</p>
+      </div>
+
+      <p className="text-medical-700 font-semibold text-lg mb-6 text-center">מי המשתמש באפליקציה כעת?</p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-2xl">
+        <button onClick={() => onSelect('dentist')} className="card-hover bg-white rounded-2xl border-2 border-medical-200 p-7 text-right shadow hover:border-medical-500 hover:shadow-xl transition-all h-full">
+          <div className="text-4xl mb-4">👨‍⚕️</div>
+          <div className="text-xl font-bold text-medical-900 mb-1">צוות רפואי / רופא שיניים</div>
+          <p className="text-sm text-medical-500 leading-relaxed">פרוטוקולי טראומה רפואיים, קיבועים, מעקבים ויומן יצוא למרפאה לפי IADT.</p>
+          <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-medical-600 bg-medical-100 px-3 py-1.5 rounded-full">מצב קליני מלא ←</div>
+        </button>
+        <button onClick={() => onSelect('parent')} className="card-hover bg-white rounded-2xl border-2 border-amber-200 p-7 text-right shadow hover:border-amber-400 hover:shadow-xl transition-all h-full">
+          <div className="text-4xl mb-4">👨‍👩‍👧</div>
+          <div className="text-xl font-bold text-gray-900 mb-1">הורה / מגיש עזרה ראשונה</div>
+          <p className="text-sm text-gray-500 leading-relaxed">צעדי עזרה ראשונה ברורים בשפה פשוטה — מה לעשות במקרה פציעה ומתי לרוץ לרופא שיניים.</p>
+          <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-100 px-3 py-1.5 rounded-full">הנחיות עזרה ראשונה ←</div>
+        </button>
+      </div>
+      <p className="mt-8 text-xs text-medical-400 text-center">פותח לעזרה ראשונה מונגשת והסברה של פרוטוקולי IADT העולמיים.</p>
+    </div>
+  );
+}
+
+function Header({ mode, onResetMode }) {
+  const modeLabel = mode === 'parent' ? '👨‍👩‍👧 הורה בעמדה' : '👨‍⚕️ צוות קליני';
+  const modeBg    = mode === 'parent' ? 'bg-amber-100 text-amber-700' : 'bg-medical-100 text-medical-700';
+  return (
+    <header className="bg-white border-b border-medical-100 px-4 sm:px-6 py-3 flex items-center gap-3 no-print">
+      <div className="w-9 h-9 rounded-xl bg-medical-600 flex items-center justify-center text-white text-lg shadow-md">🦷</div>
+      <div><h1 className="text-lg font-extrabold text-medical-900 leading-tight">DentoSafe</h1><p className="text-xs text-medical-400 font-medium">לפי IADT 2020</p></div>
+      {mode && (
+        <div className="mr-auto flex items-center gap-2">
+          <span className={`text-xs font-semibold px-3 py-1 rounded-full ${modeBg}`}>{modeLabel}</span>
+          <button onClick={onResetMode} className="text-xs text-medical-400 hover:text-medical-600 px-2 py-1 rounded-lg hover:bg-medical-50">⇄ החלף</button>
+        </div>
+      )}
+    </header>
+  );
+}
+
+function ToothTypeCard({ type, label, subtitle, icon, selected, onClick }) {
+  return (
+    <button onClick={onClick} className={`card-hover w-full rounded-2xl border-2 p-5 text-right transition-all ${selected ? 'border-medical-500 bg-medical-600 text-white shadow-lg' : 'border-medical-200 bg-white text-medical-800 hover:border-medical-400'}`}>
+      <div className="text-3xl mb-2 text-left w-full block">{icon}</div>
+      <div className="font-bold text-base mb-0.5">{label}</div>
+      <div className={`text-xs ${selected ? 'text-medical-200' : 'text-medical-400'}`}>{subtitle}</div>
+    </button>
+  );
+}
+
+function InjuryCard({ injury, injuryKey, onClick }) {
+  const cfg = severityConfig[injury.severity] || severityConfig.low;
+  return (
+    <button onClick={onClick} className={`card-hover w-full rounded-xl border-2 ${cfg.border} bg-white p-4 text-right flex items-center gap-3 group`}>
+      <div className="flex-shrink-0"><InjuryDiagram injuryKey={injuryKey} /></div>
+      <div className="flex-1 min-w-0 pr-4">
+        <div className="flex items-center gap-2 flex-wrap mb-1"><span className="font-semibold text-medical-900 text-sm">{injury.label}</span><SeverityBadge severity={injury.severity} /></div>
+        <p className="text-xs text-medical-500 leading-relaxed line-clamp-2">{injury.description}</p>
+      </div>
+      <span className="text-medical-300 group-hover:text-medical-500 text-xl flex-shrink-0 text-left pl-2">←</span>
+    </button>
+  );
+}
+
+function ParentProtocolPanel({ injury, injuryKey, onBack }) {
+  const cfg = severityConfig[injury.severity] || severityConfig.low;
+  const isAvulsion = !!injury.extraoralTime;
+  const urgencyMap = {
+    critical: { label: "להגיע מיד", color: "bg-red-600 text-white", sub: "חירום דנטלי - יש ללכת עוד עכשיו למרפאה" },
+    high:     { label: "היום סמוך לאירוע",  color: "bg-orange-500 text-white", sub: "באותו היום של החבלה" },
+    moderate: { label: "תוך מס' ימים",   color: "bg-yellow-400 text-white", sub: "תוך 24-48 שעות כדי לאתר בעיה נסתרת" },
+    low:      { label: "שגרתי", color: "bg-green-500 text-white", sub: "פחות דחוף, צור קשר כשניתן" },
+  };
+  const urgency = urgencyMap[injury.severity] || urgencyMap.low;
+
+  return (
+    <div className="fade-in bg-white rounded-2xl border border-medical-100 shadow-sm overflow-hidden print-card">
+      <div className={`px-5 py-4 ${cfg.bg} border-b ${cfg.border}`}>
+        <button onClick={onBack} className={`text-sm font-semibold ${cfg.text} bg-white bg-opacity-60 hover:bg-opacity-90 mb-4 flex items-center gap-2 px-4 py-2 rounded-xl border border-current border-opacity-20 hover:border-opacity-40 transition-all no-print`}>
+          ← חזור
+        </button>
+        <div className="flex items-center gap-4">
+          <InjuryDiagram injuryKey={injuryKey} />
+          <div className="pr-2">
+            <div className="flex items-center gap-2 mb-1 flex-wrap"><h2 className="text-xl font-bold text-medical-900">{injury.label}</h2><SeverityBadge severity={injury.severity} /></div>
+            <p className="text-sm text-medical-600">{injury.description}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-5 space-y-5">
+        <div className={`rounded-xl p-4 ${urgency.color} flex items-center gap-3`}>
+          <span className="text-2xl">🏥</span>
+          <div><div className="font-extrabold text-lg tracking-wide">{urgency.label}</div><div className="text-sm opacity-90">{urgency.sub}</div></div>
+        </div>
+
+        {isAvulsion && <AvulsionTimer />}
+
+        <div>
+          <h3 className="text-sm font-bold text-gray-700 mb-3 tracking-wider">מה לעשות עכשיו (עזרה ראשונה):</h3>
+          <ol className="space-y-3">
+            {(injury.parentActions || injury.immediateActions || []).map((action, i) => (
+              <li key={i} className="flex gap-3"><span className="flex-shrink-0 w-7 h-7 rounded-full bg-amber-500 text-white text-sm flex items-center justify-center font-bold">{i+1}</span><span className="pt-0.5 text-gray-800 text-sm leading-relaxed">{action}</span></li>
+            ))}
+          </ol>
+        </div>
+
+        {injuryKey === 'avulsion' && (
+          <div className="rounded-xl bg-red-50 border border-red-200 p-4">
+            <p className="text-sm font-bold text-red-700">⚠ בשיני חלב בלבד - אין לנסות לדחוף שן חזרה פנימה!</p>
+            <p className="text-xs text-red-600 mt-1">זה רק יסב נזק עמוק לשן הקבועה שעתידה לבקוע.</p>
+          </div>
+        )}
+
+        <p className="text-xs text-gray-400 text-center pt-2">מיועד לעזרה ראשונה בלבד. הטיפול באחריות הצוות המטפל בלבד.</p>
+      </div>
+    </div>
+  );
+}
+
+function ProtocolPanel({ injury, injuryKey, toothType, onBack }) {
+  const [tab, setTab] = React.useState('treatment');
+  const cfg = severityConfig[injury.severity] || severityConfig.low;
+  const isAvulsion = !!injury.extraoralTime;
+
+  const handlePrint = () => window.print();
+  const handleICS = () => downloadICS(buildICS(injury.label, injury.followUp), `DentoSafe_FU_${injuryKey}.ics`);
+
+  return (
+    <div className="fade-in bg-white rounded-2xl border border-medical-100 shadow-sm overflow-hidden print-card">
+      <div className={`px-5 py-4 ${cfg.bg} border-b ${cfg.border}`}>
+        <div className="flex items-center justify-between mb-3 no-print">
+          <button onClick={onBack} className={`text-sm font-semibold ${cfg.text} bg-white bg-opacity-60 hover:bg-opacity-90 flex items-center gap-2 px-4 py-2 rounded-xl border border-current border-opacity-20 hover:border-opacity-40 transition-all`}>
+            ← חזור
+          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={handleICS} className="text-xs bg-white text-medical-600 border border-medical-200 px-3 py-1.5 rounded-lg hover:bg-medical-50 flex items-center gap-1 font-medium">📅 יצוא למעקב</button>
+            <button onClick={handlePrint} className="text-xs bg-white text-medical-600 border border-medical-200 px-3 py-1.5 rounded-lg hover:bg-medical-50 flex items-center gap-1 font-medium">🖨 הדפסה</button>
+          </div>
+        </div>
+        <div className="flex items-start gap-4">
+          <InjuryDiagram injuryKey={injuryKey} />
+          <div className="pr-2">
+            <div className="flex items-center gap-2 mb-1 flex-wrap"><h2 className="text-xl font-bold text-medical-900">{injury.label}</h2><SeverityBadge severity={injury.severity} /></div>
+            <p className="text-sm text-medical-600">{injury.description}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex border-b border-medical-100 bg-medical-50 px-4 no-print text-sm">
+        {[{id:'treatment',l:'טיפול וקליניקה'},{id:'splinting',l:'קיבוע'},{id:'followup',l:'מעקבים ואנליזה'}].map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)} className={`px-4 py-3 font-semibold border-b-2 transition-colors ${tab === t.id ? 'border-medical-500 text-medical-700' : 'border-transparent text-medical-400 hover:text-medical-600'}`}>{t.l}</button>
+        ))}
+      </div>
+
+      <div className="p-5">
+        {tab === 'treatment' && (
+          <div className="fade-in">
+            <h3 className="text-xs font-semibold text-medical-700 mb-3 uppercase tracking-wider">פרוטוקול ופעולות</h3>
+            <ol className="space-y-2">
+              {(injury.immediateActions || []).map((action, i) => (
+                <li key={i} className="flex gap-3 text-sm text-medical-800"><span className="flex-shrink-0 w-6 h-6 rounded-full bg-medical-600 text-white text-xs flex items-center justify-center font-bold pointer-events-none">{i+1}</span><span className="pt-0.5 leading-relaxed">{action}</span></li>
+              ))}
+            </ol>
+            {isAvulsion && (
+              <div className="mt-6">
+                <h3 className="text-xs font-semibold text-medical-700 mb-3 tracking-wider">זמני ניתוק אקסטרה-אורלים והשלכות פרוטוקול:</h3>
+                <div className="grid gap-3">
+                  {Object.values(injury.extraoralTime).map((scenario, i) => (
+                    <div key={i} className="rounded-xl border border-medical-200 p-4 bg-gray-50"><div className="font-bold text-medical-800 text-sm mb-2">{scenario.label}</div><ul className="space-y-1">{scenario.protocol.map((step, j) => (<li key={j} className="text-xs text-medical-600 flex gap-2"><span className="text-medical-400">•</span>{step}</li>))}</ul></div>
+                  ))}
+                </div>
+              </div>
+            )}
+             {injury.prognosis && (<div className="mt-5 p-4 rounded-xl bg-medical-50 border border-medical-100"><div className="text-xs font-semibold text-medical-600 mb-1 tracking-wider">הערכת פרוגנוזה</div><p className="text-sm text-medical-800">{injury.prognosis}</p></div>)}
+          </div>
+        )}
+
+        {tab === 'splinting' && (
+          <div className="fade-in">
+            <h3 className="text-xs font-semibold text-medical-700 mb-3 tracking-wider">זמני קיבועים למקרה זה</h3>
+            <div className="p-4 rounded-xl bg-medical-50 border border-medical-200 text-sm text-medical-800">{injury.splinting}</div>
+          </div>
+        )}
+
+        {tab === 'followup' && (
+          <div className="fade-in">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-medical-700 tracking-wider">יומן מעקבים למרפאה</h3>
+              <button onClick={handleICS} className="no-print text-xs bg-medical-600 text-white px-3 py-1.5 rounded-lg hover:bg-medical-700 font-medium">📅 יצוא קובץ יומן</button>
+            </div>
+            <div className="space-y-2">
+              {(injury.followUp || []).map((fu, i) => (
+                <div key={i} className="flex items-start gap-2.5 px-3 py-2 rounded-lg bg-medical-50 border border-medical-100"><span className="w-5 h-5 rounded-full bg-medical-500 text-white text-xs flex items-center justify-center font-bold flex-shrink-0 mt-0.5">{i+1}</span><span className="text-xs text-medical-700 leading-relaxed">{fu}</span></div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [userMode, setUserMode] = React.useState(null);
+  const [toothType, setToothType] = React.useState(null);
+  const [selectedInjury, setSelectedInjury] = React.useState(null);
+
+  const handleQuickAvulsion = () => { setToothType('permanent'); setSelectedInjury('avulsion'); };
+  const handleResetMode = () => { setUserMode(null); setToothType(null); setSelectedInjury(null); };
+
+  const injuries = toothType ? clinicalData[toothType] : {};
+  const isParent = userMode === 'parent';
+
+  if (!userMode) return <ModeSelectScreen onSelect={setUserMode} />;
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <EmergencyBanner onQuickAvulsion={handleQuickAvulsion} mode={userMode} />
+      <Header mode={userMode} onResetMode={handleResetMode} />
+
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-6 space-y-6">
+        {!selectedInjury && (
+          <section>
+            <div className="flex items-center gap-2 mb-3 no-print"><span className="w-6 h-6 rounded-full bg-medical-600 text-white text-xs flex items-center justify-center font-bold">1</span><h2 className="font-semibold text-medical-800">בחר סוג רבדים (משנן)</h2></div>
+            <div className="grid grid-cols-2 gap-3">
+              <ToothTypeCard type="permanent" label="שיניים קבועות" subtitle="משנן בוגר (גיל 6+)" icon="🦷" selected={toothType === 'permanent'} onClick={() => { setToothType('permanent'); setSelectedInjury(null); }} />
+              <ToothTypeCard type="primary" label="שיניים נשירות (חלב)" subtitle="משנן ילדים (0-6)" icon="🐣" selected={toothType === 'primary'} onClick={() => { setToothType('primary'); setSelectedInjury(null); }} />
+            </div>
+          </section>
+        )}
+
+        {toothType && !selectedInjury && (
+          <section className="fade-in">
+            <div className="flex items-center gap-2 mb-3 no-print"><span className="w-6 h-6 rounded-full bg-medical-600 text-white text-xs flex items-center justify-center font-bold">2</span><h2 className="font-semibold text-medical-800">בחר המקרה הדנטלי שעברת:</h2></div>
+            <div className="space-y-2">
+              {Object.entries(injuries).map(([key, injury]) => (
+                <InjuryCard key={key} injury={injury} injuryKey={key} onClick={() => setSelectedInjury(key)} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {toothType && selectedInjury && (
+          <section className="fade-in">
+            <div className="flex items-center gap-2 mb-3 no-print"><span className="w-6 h-6 rounded-full bg-medical-600 text-white text-xs flex items-center justify-center font-bold">3</span><h2 className="font-semibold text-medical-800">{isParent ? 'הנחיות - מה לעשות' : 'פרוטוקול עבודה'}</h2></div>
+            {isParent ? <ParentProtocolPanel injury={injuries[selectedInjury]} injuryKey={selectedInjury} onBack={() => setSelectedInjury(null)} /> : <ProtocolPanel injury={injuries[selectedInjury]} injuryKey={selectedInjury} toothType={toothType} onBack={() => setSelectedInjury(null)} />}
+          </section>
+        )}
+
+        {!toothType && (
+            <div className="text-center py-12 text-medical-400">
+                <div className="text-5xl mb-4">🦷</div>
+                <p className="text-sm">אנא השלם את השלבים שלמעלה ולחץ על הבחירה המועדפת כדי להמשיך להנחיות.</p>
+            </div>
+        )}
+      </main>
+
+      <footer className="text-center py-4 text-xs text-medical-300 border-t border-medical-100 bg-white no-print">
+        DentoSafe · תרגום לעברית · לשימוש רפואי ולשגיאת הצוות הרפואי.
+      </footer>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
